@@ -1,32 +1,17 @@
 package edu.brown.cs.tderosa.livingcity;
 
-import edu.brown.cs.tderosa.utils.LatLng;
+import java.util.List;
 
-public class Place implements LatLng {
-	private Double lat, lng;
-	private String id, description;
-	
-	public Place(String id) {
-		this.id = id;
-	}
+public class Place {
+  private LatLng location;
+  private String id, name, intro, pic_path;
+  private List<Comment> comments;
 
-	@Override
-	public Double lat() {
-		return lat;
-	}
-
-	@Override
-	public Double lng() {
-		return lng;
-	}
-
-	@Override
-	public void setLat(Double newLat) {
-		lat = newLat;
-	}
-
-	@Override
-	public void setLng(Double newLng) {
-		lng = newLng;
-	}
+  public Place(String id, String name, String intro, String pic_path, LatLng location) {
+    this.id = id;
+    this.name = name;
+    this.intro = intro;
+    this.pic_path = pic_path;
+    this.location = location;
+  }
 }

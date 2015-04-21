@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 /**
  * CSV parser class. Takes in a filename and parses.
+ * 
  * @author tderosa
  */
 public class CSV {
@@ -16,6 +17,7 @@ public class CSV {
 
   /*
    * Creates a CSV parser.
+   * 
    * @param file: name of csv file.
    */
   public CSV(String file) {
@@ -24,6 +26,7 @@ public class CSV {
 
   /**
    * Parses file
+   * 
    * @return Arraylist of strings representing parsed text.
    */
   public ArrayList<String[]> parse() {
