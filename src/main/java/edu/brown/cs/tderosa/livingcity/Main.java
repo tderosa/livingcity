@@ -70,16 +70,34 @@ public class Main {
     // Setup Spark Routes
     Spark.get("/", new FrontHandler(), freeMarker);
     Spark.post("/getPlaces", new GetPlaces());
+    Spark.post("/getAllPlaces", new SendAllPlaces());
+    Spark.get("/:placeID", new PlaceHandler(), freeMarker);
   }
 
-  /**
-   * Handles main page template.
-   * 
-   * @author tderosa
-   */
+  private class PlaceHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      String id = req.params(":placeID");
+      
+      Place p = null;
+      try {
+        p = db.getPlaceById(id);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+
+      String picturePath = "'../assets/" + p.picture() + "'";
+
+      Map<String, Object> variables = ImmutableMap.of("title", "Living City", "name", p.name(), "intro", p.intro(), "picture", picturePath);
+      return new ModelAndView(variables, "place.ftl");
+    }
+  }
+  
   private static class FrontHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
+      
+      
       Map<String, Object> variables = ImmutableMap.of("title", "Living City");
       return new ModelAndView(variables, "main.ftl");
     }

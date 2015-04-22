@@ -10,15 +10,10 @@
   </head>
   <body>
      <div class="container">
-     <p class="title">Living City</p>
-     <div class="nav">
-        <a href="/list" class="btn">List</a>
-        <div id="search-bar">
-          <input type="text" id="search">
-          <img id="search-icon" src="assets/search.png" />
-        </div>
-     </div>
-     <div id="map-container"></div>
+     <p class="title">${title}</p>
+     <div class="name">${name}</div>
+     <img class="place-img" src=${picture}>
+     <p class="intro">${intro}</p>
    </div>
      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4mxarX8cOcCQ2DIKZK1w9hBF8T3j1poo"></script>
      <script src="js/jquery-2.1.1.js"></script>
