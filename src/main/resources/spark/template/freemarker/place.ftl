@@ -11,7 +11,7 @@
   <body>
      <div class="container">
      <p class="title">Living City</p>
-     <a href="/"><img id="back-btn" src="../assets/back.png"></a>
+     <a class="back-btn" href="/"><img class="back-img" src="../assets/back.png"></a>
      <div class="name">${name}</div>
      <img class="place-img" src=${picture}>
      <div class="place-options">

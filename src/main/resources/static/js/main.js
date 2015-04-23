@@ -9,8 +9,7 @@ $(document).ready(function() {
 	  var mapOptions = {
 	    zoom: 15
 	  };
-	  map = new google.maps.Map(document.getElementById('map-container'),
-	      mapOptions);
+	  map = new google.maps.Map(document.getElementById('map-container'), mapOptions);
 	
 	  // Try HTML5 geolocation
 	  if(navigator.geolocation) {

@@ -70,8 +70,9 @@ public class DBManager {
 
   public Place getPlaceById(String id) throws SQLException {
     Place place = placeCache.get(id);
-    
+    System.out.println("what is place " + place);
     if (place == null) {
+      System.out.println(id);
       String query = "SELECT * FROM place WHERE id = ?;";
       PreparedStatement prep = conn.prepareStatement(query);
       prep.setString(1, id);
@@ -93,7 +94,7 @@ public class DBManager {
         places.add(place);
         placeCache.put(id, place);
       }
-
+      System.out.println("palce " + place);
       rs.close();
       prep.close();
     }
@@ -125,6 +126,9 @@ public class DBManager {
     rs.close();
     prep.close();
     
+    for (String IDD: places.keySet()) {
+      System.out.println(IDD + " / " + places.get(IDD));
+    }
     return places;
   }
   
@@ -135,7 +139,7 @@ public class DBManager {
     }
     
     
-    String query = "INSERT INTO OR IGNORE 'story' VALUES(?,?,?,?,?,?);";
+    String query = "INSERT OR IGNORE INTO 'story' VALUES(?,?,?,?,?,?);";
       
     PreparedStatement prep = conn.prepareStatement(query);
     prep.setString(1, storyID);
@@ -145,11 +149,9 @@ public class DBManager {
     prep.setString(5, text);
     prep.setString(6, p.id());
     
-    ResultSet rs = prep.executeQuery();
-    while (rs.next()) {
-      System.out.println(rs.toString());
-    }
-    
+    prep.addBatch();
+    prep.executeBatch();
+    prep.close();
     String[] dateArray = date.split("-");
     
     Story story = new Story(storyID, dateArray, author, authorAbt, text);

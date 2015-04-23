@@ -70,7 +70,7 @@ public class Main {
     Spark.post("/getAllPlaces", new SendAllPlaces());
     Spark.get("/:placeID", new PlaceHandler(), freeMarker);
     Spark.get("/:placeID/add", new StoryFormView(), freeMarker);
-    Spark.post("/add", new AddStoryRoute());
+    Spark.post("/add", new AddStory(), freeMarker);
   }
 
   private class PlaceHandler implements TemplateViewRoute {
@@ -84,7 +84,8 @@ public class Main {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-
+      
+      System.out.println(p);
       String picturePath = "'../assets/" + p.picture() + "'";
       String storyHTML = "";
       List<Story> stories = null;
@@ -117,8 +118,6 @@ public class Main {
     @Override
     public ModelAndView handle(Request req, Response res) {
       String id = req.params(":placeID");
-
-      System.out.println(id);
       
       Place p = null;
       try {
@@ -126,15 +125,15 @@ public class Main {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      
-      Map<String, Object> variables = ImmutableMap.of("title", "Living City", "name", p.name(), "id", id);
+      String link = "/" + id;
+      Map<String, Object> variables = ImmutableMap.of("title", "Living City", "name", p.name(), "id", id, "placeLink", link);
       return new ModelAndView(variables, "add.ftl");
     }
   }
 
-  private class AddStoryRoute implements Route {
+  private class AddStory implements TemplateViewRoute {
     @Override
-    public Object handle(final Request req, final Response res) {
+    public ModelAndView handle(final Request req, final Response res) {
       QueryParamsMap qm = req.queryMap();
       String id = qm.value("id");
       Place p = null;
@@ -161,8 +160,26 @@ public class Main {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-
-      return GSON.toJson(s);
+      
+      String addLink = "'/" + id + "/add'";
+      String picturePath = "'../assets/" + p.picture() + "'";
+      String storyHTML = "";
+      
+      List<Story> stories = null;
+      try {
+        stories = db.getStories(id);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      
+      for (Story story: stories) {
+        String dateString = dateToString(story);
+        storyHTML += "<div class='story'><p class='date'>" + dateString + "</p><p class='story-text'>- "+story.text()+"</p><p class='author'> - "+story.author()+"</p><p class='author-abt'>"+story.authorAbt()+"</p></div>";
+      }
+      
+      res.redirect("/" + id);
+      Map<String, Object> variables = ImmutableMap.of("name", p.name(), "addLink", addLink,"intro", p.intro(), "picture", picturePath, "stories", storyHTML);
+      return new ModelAndView(variables, "place.ftl");
     }
   }
   
@@ -186,8 +203,6 @@ public class Main {
         e.printStackTrace();
       }
 
-      System.out.println(places.size());
-      System.out.println();
       return GSON.toJson(places);
     }
   }

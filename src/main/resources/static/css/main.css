@@ -35,10 +35,13 @@ body {
 	position: relative;
 }
 
-#back-btn {
+.back-btn {
 	position: relative;
 	top: -37px;
 	left: -155px;
+}
+
+.back-img {
 	width: 40px;
 	height: 40px;
 }
@@ -93,10 +96,84 @@ body {
 	top: 135px;
 	z-index: 99;
 	font-size: 65px;
+	font-size: 18vw;
 	font-family: 'bebas_neuebold', sans-serif;
 	color: rgba(255,255,255,.7);
 	text-align: center;
 	margin-top: -100px;
+}
+
+#form-hdr {
+	font-family: 'robotolight', sans-serif;
+	color: rgba(255,255,255,.7);
+	text-align: center;
+	font-size: 36px;
+	margin: 0;
+	position: relative;
+	top: 12px;
+}
+
+.hdr-box {
+	background-color: #003366;
+	position: relative;
+}
+
+#place-name {
+	font-family: 'bebas_neuebold', sans-serif;
+	color: rgba(255,255,255,.7);
+	font-size: 61px;
+	margin: 0;
+	position: relative;
+	top: -12px;
+}
+
+.form {
+	text-align: left;
+	padding: 20px;
+	font-family: 'robotoregular', sans-serif;
+	color: #EBF2FA;
+}
+
+.input {
+	background-color: rgba(255,255,255,.25);
+	box-shadow: 2px 2px 2px 0px rgba(0,51,102,.25);
+	border-radius: 5px;
+	border: 0;
+	color: #FFF;
+	padding: 10px 5px;
+	width: 100%;
+	margin: 5px 0;
+}
+
+::-webkit-input-placeholder {
+	color: #FFF;
+}
+
+.form-date {
+	width: 100%;
+}
+
+#date-label {
+	width: 15%;
+	display: inline-block;
+	font-size: 11px;
+	text-align: right;
+	
+}
+
+#month {
+	width: 30%;
+	margin-right: 5px;
+	margin-left: 5px;
+}
+
+#year {
+	width: 35%;
+}
+
+.subheader {
+	font-size: 24px;
+	color: #003366;
 }
 
 #intro {
@@ -119,7 +196,7 @@ body {
 }
 
 .author {
-	display: inline-block;
+	display: block;
 	margin: 0;
 	padding-top: 10px;
 	font-family: 'robotoregular', sans-serif;
@@ -162,7 +239,15 @@ body {
 #add-btn {
 	margin-top: 20px;
 	width: 100%;
-	
+}
+
+#add-form-btn {
+	width: 100%;
+	font-size: 28px;
+	margin-bottom: 20px;
+	margin-top: 10px;
+	background-color: #003366;
+	color: #FFF;
 }
 
 #stories-title {
