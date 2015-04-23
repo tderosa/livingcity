@@ -3,6 +3,7 @@ $(document).ready(function() {
 	var currPos;
 	var places = [];
 	var showIntro = true;
+	var mapView = true;
 	
 	function initialize() {
 	  var mapOptions = {
@@ -35,7 +36,7 @@ $(document).ready(function() {
 	    handleNoGeolocation(false);
 	  }
 	  
-	  getAllPlaces();
+	  initPlaces();
 	}
 	
 	function handleNoGeolocation(errorFlag) {
@@ -69,7 +70,7 @@ $(document).ready(function() {
 		})
 	}
 	
-	function getAllPlaces() {
+	function initPlaces() {
 		$.post("/getAllPlaces", function(responseJSON) {
 			var allPlaces = JSON.parse(responseJSON);
 			allPlaces.forEach(function(p) {
@@ -95,7 +96,6 @@ $(document).ready(function() {
 			});
 		})
 	}
-	
 	
 	google.maps.event.addDomListener(window, 'load', initialize);
 });

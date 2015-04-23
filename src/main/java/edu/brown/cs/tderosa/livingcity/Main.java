@@ -1,16 +1,12 @@
 package edu.brown.cs.tderosa.livingcity;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 import spark.ModelAndView;
 import spark.QueryParamsMap;
@@ -73,7 +69,8 @@ public class Main {
     Spark.post("/getPlaces", new GetPlaces());
     Spark.post("/getAllPlaces", new SendAllPlaces());
     Spark.get("/:placeID", new PlaceHandler(), freeMarker);
-    Spark.get("/:placeID/add", new AddStoryHandler(), freeMarker);
+    Spark.get("/:placeID/add", new StoryFormView(), freeMarker);
+    Spark.post("/add", new AddStoryRoute());
   }
 
   private class PlaceHandler implements TemplateViewRoute {
@@ -105,6 +102,105 @@ public class Main {
       String addLink = "'/" + id + "/add'";
       Map<String, Object> variables = ImmutableMap.of("name", p.name(), "addLink", addLink,"intro", p.intro(), "picture", picturePath, "stories", storyHTML);
       return new ModelAndView(variables, "place.ftl");
+    }
+  }
+  
+  private static class FrontHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title", "Living City");
+      return new ModelAndView(variables, "main.ftl");
+    }
+  }
+  
+  private class StoryFormView implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      String id = req.params(":placeID");
+
+      System.out.println(id);
+      
+      Place p = null;
+      try {
+        p = db.getPlaceById(id);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      
+      Map<String, Object> variables = ImmutableMap.of("title", "Living City", "name", p.name(), "id", id);
+      return new ModelAndView(variables, "add.ftl");
+    }
+  }
+
+  private class AddStoryRoute implements Route {
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String id = qm.value("id");
+      Place p = null;
+      try {
+        p = db.getPlaceById(id);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      
+      String author = qm.value("author");
+      String authorAbt = qm.value("authorAbt");
+      String month = qm.value("month");
+      String date;
+      if (month == null) {
+        date = qm.value("year");
+      } else {
+        date = month + "-" + qm.value("year");
+      }
+      String text = qm.value("storyText");
+      
+      Story s = null;
+      try {
+        s = db.insertStory(p, date, author, authorAbt, text);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+
+      return GSON.toJson(s);
+    }
+  }
+  
+  private class GetPlaces implements Route {
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+      Double latNE = Double.parseDouble(qm.value("latNE"));
+      Double lngNE = Double.parseDouble(qm.value("lngNE"));
+      Double latSW = Double.parseDouble(qm.value("latSW"));
+      Double lngSW = Double.parseDouble(qm.value("lngSW"));
+
+      LatLng northEast = new LatLng(latNE, lngNE);
+      LatLng southWest = new LatLng(latSW, lngSW);
+
+      List<Place> places = null;
+
+      try {
+        places = db.getPlaceByLatLng(northEast, southWest);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+
+      System.out.println(places.size());
+      System.out.println();
+      return GSON.toJson(places);
+    }
+  }
+
+  private class SendAllPlaces implements Route {
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+
+      Collection<Place> places = null;
+
+      places = db.places();
+      return GSON.toJson(places);
     }
   }
   
@@ -154,70 +250,5 @@ public class Main {
       date = month + " " + Integer.toString(s.date().get(Calendar.YEAR));
     }
     return date;
-  }
-  
-  private static class FrontHandler implements TemplateViewRoute {
-    @Override
-    public ModelAndView handle(Request req, Response res) {
-      
-      
-      Map<String, Object> variables = ImmutableMap.of("title", "Living City");
-      return new ModelAndView(variables, "main.ftl");
-    }
-  }
-  
-  private static class AddStoryHandler implements TemplateViewRoute {
-    @Override
-    public ModelAndView handle(Request req, Response res) {
-      String id = req.params(":placeID");
-      
-      System.out.println(id);
-      
-      Map<String, Object> variables = ImmutableMap.of("title", "Living City");
-      return new ModelAndView(variables, "main.ftl");
-    }
-  }
-
-  private class GetPlaces implements Route {
-    @Override
-    public Object handle(final Request req, final Response res) {
-      QueryParamsMap qm = req.queryMap();
-      Double latNE = Double.parseDouble(qm.value("latNE"));
-      Double lngNE = Double.parseDouble(qm.value("lngNE"));
-      Double latSW = Double.parseDouble(qm.value("latSW"));
-      Double lngSW = Double.parseDouble(qm.value("lngSW"));
-
-      LatLng northEast = new LatLng(latNE, lngNE);
-      LatLng southWest = new LatLng(latSW, lngSW);
-
-      List<Place> places = null;
-
-      try {
-        places = db.getPlaceByLatLng(northEast, southWest);
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-
-      System.out.println(places.size());
-      System.out.println();
-      return GSON.toJson(places);
-    }
-  }
-
-  private class SendAllPlaces implements Route {
-    @Override
-    public Object handle(final Request req, final Response res) {
-      QueryParamsMap qm = req.queryMap();
-
-      List<Place> places = null;
-
-      try {
-        places = db.getPlaces();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-
-      return GSON.toJson(places);
-    }
   }
 }

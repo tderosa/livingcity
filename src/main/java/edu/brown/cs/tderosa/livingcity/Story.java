@@ -17,6 +17,10 @@ public class Story {
     this.date = stringToCal(date);
   }
   
+  public void setPlace(Place p) {
+    place = p;
+  }
+  
   public Calendar stringToCal(String[] date) {
     Calendar newDate = new GregorianCalendar();
     if (date.length == 1) {

@@ -16,6 +16,10 @@ public class Place {
     stories = null;
   }
   
+  public String id() {
+    return id;
+  }
+  
   public void setStories(List<Story> newStories) {
     stories = newStories;
   }

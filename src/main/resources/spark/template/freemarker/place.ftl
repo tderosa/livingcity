@@ -1,7 +1,7 @@
 <!DOCTYPE html>
   <head>
     <meta charset="utf-8">
-    <title>${title}</title>
+    <title>Living City</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/html5bp.css">
@@ -11,7 +11,7 @@
   <body>
      <div class="container">
      <p class="title">Living City</p>
-     <img id="back-btn" src="../assets/back.png">
+     <a href="/"><img id="back-btn" src="../assets/back.png"></a>
      <div class="name">${name}</div>
      <img class="place-img" src=${picture}>
      <div class="place-options">
