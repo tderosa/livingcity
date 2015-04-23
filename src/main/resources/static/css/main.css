@@ -32,6 +32,15 @@ body {
 	font-size: 26px;
 	color: #003366;
 	font-family: 'gobold_thinregular', sans-serif;
+	position: relative;
+}
+
+#back-btn {
+	position: relative;
+	top: -37px;
+	left: -155px;
+	width: 40px;
+	height: 40px;
 }
 
 .container {
@@ -67,7 +76,7 @@ body {
 	box-shadow: 3px 3px 4px 0px rgba(0,51,102,.5);
 	background-color: rgba(255, 255, 255, .3);
 	padding: 5px 15px;
-	font-family: 'abeezeeregular', sans-serif;
+	font-family: 'robotoregular', sans-serif;
 	float: left;
 	color: #003366;
 	text-decoration: none;
@@ -81,10 +90,87 @@ body {
 
 .name {
 	position: relative;
-	
+	top: 135px;
+	z-index: 99;
+	font-size: 65px;
 	font-family: 'bebas_neuebold', sans-serif;
 	color: rgba(255,255,255,.7);
 	text-align: center;
-	margin: 0 auto;
+	margin-top: -100px;
 }
 
+#intro {
+	text-align: justify;
+	font-family: 'robotolight', sans-serif;
+	color: #EBF2FA;
+}
+
+.story {
+	text-align: justify;
+	font-family: 'robotolight', sans-serif;
+	color: #EBF2FA;
+	border: none;  
+    border-top: 1px solid #EBF2FA;
+    padding: 15px 10px;
+}
+
+.story-text {
+	display: inline;
+}
+
+.author {
+	display: inline-block;
+	margin: 0;
+	padding-top: 10px;
+	font-family: 'robotoregular', sans-serif;
+}
+
+.author-abt {
+	font-size: 10px;
+	margin: 0;
+}
+
+.date {
+	font-style: italic;
+	margin: 0;
+	display: inline-block;
+}
+
+.place-options {
+	height: 50px;
+	font-family: 'robotoregular', sans-serif;
+}
+
+.underline {
+	text-decoration: underline;
+}
+
+.option {
+	margin: 0;
+	line-height: 3.3;
+	display: inline-block;
+	font-size: 20px;
+	width: 49%;
+	text-align: center;
+	color: #003366;
+}
+
+#stories-list {
+	clear: both;
+}
+
+#add-btn {
+	margin-top: 20px;
+	width: 100%;
+	
+}
+
+#stories-title {
+	text-align: left;
+	font-size: 25px;
+	padding-top: 30px;
+	padding-bottom: 10px;
+	margin: 0;
+	clear: both;
+	
+}

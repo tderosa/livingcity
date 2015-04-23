@@ -5,7 +5,7 @@ import java.util.List;
 public class Place {
   private LatLng location;
   private String id, name, intro, picture;
-  private List<Comment> comments;
+  private List<Story> stories;
 
   public Place(String id, String name, String intro, String picture, LatLng location) {
     this.id = id;
@@ -13,6 +13,15 @@ public class Place {
     this.intro = intro;
     this.picture = picture;
     this.location = location;
+    stories = null;
+  }
+  
+  public void setStories(List<Story> newStories) {
+    stories = newStories;
+  }
+  
+  public List<Story> stories() {
+    return stories;
   }
   
   public String name() {

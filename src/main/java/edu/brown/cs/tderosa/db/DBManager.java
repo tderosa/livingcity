@@ -13,6 +13,7 @@ import java.util.Map;
 
 import edu.brown.cs.tderosa.livingcity.LatLng;
 import edu.brown.cs.tderosa.livingcity.Place;
+import edu.brown.cs.tderosa.livingcity.Story;
 
 public class DBManager {
   private String db;
@@ -149,6 +150,37 @@ public class DBManager {
     prep.close();
 
     return places;
+  }
+  
+  public List<Story> getStories(String placeID) throws SQLException {
+    Place p = getPlaceById(placeID);
+    String query = "SELECT * FROM story WHERE place = ?;";
+    PreparedStatement prep = conn.prepareStatement(query);
+    prep.setString(1, placeID);
+    
+    String id, authorName, authorAbt, text, date;
+    ResultSet rs = prep.executeQuery();
+    List<Story> stories = new ArrayList<Story>();
+    if (rs == null) {
+      return null;
+    }
+
+    while (rs.next()) {
+      id = rs.getString(1);
+      date = rs.getString(2);
+      String[] dateArray = date.split("-");
+      authorName = rs.getString(3);
+      authorAbt = rs.getString(4);
+      text = rs.getString(5);
+      Story s = new Story(id, dateArray, authorName, authorAbt, text);
+      stories.add(s);
+    }
+
+    rs.close();
+    prep.close();
+   
+    p.setStories(stories);    
+    return stories;
   }
 
   public void addPicture(byte[] picture) throws SQLException {

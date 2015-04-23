@@ -2,6 +2,7 @@ $(document).ready(function() {
 	var map;
 	var currPos;
 	var places = [];
+	var showIntro = true;
 	
 	function initialize() {
 	  var mapOptions = {
@@ -94,7 +95,6 @@ $(document).ready(function() {
 			});
 		})
 	}
-	
 	
 	
 	google.maps.event.addDomListener(window, 'load', initialize);

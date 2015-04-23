@@ -6,6 +6,7 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +73,7 @@ public class Main {
     Spark.post("/getPlaces", new GetPlaces());
     Spark.post("/getAllPlaces", new SendAllPlaces());
     Spark.get("/:placeID", new PlaceHandler(), freeMarker);
+    Spark.get("/:placeID/add", new AddStoryHandler(), freeMarker);
   }
 
   private class PlaceHandler implements TemplateViewRoute {
@@ -87,16 +89,89 @@ public class Main {
       }
 
       String picturePath = "'../assets/" + p.picture() + "'";
-
-      Map<String, Object> variables = ImmutableMap.of("title", "Living City", "name", p.name(), "intro", p.intro(), "picture", picturePath);
+      String storyHTML = "";
+      List<Story> stories = null;
+      try {
+        stories = db.getStories(id);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      
+      for (Story s: stories) {
+        String dateString = dateToString(s);
+        storyHTML += "<div class='story'><p class='date'>" + dateString + "</p><p class='story-text'>- "+s.text()+"</p><p class='author'> - "+s.author()+"</p><p class='author-abt'>"+s.authorAbt()+"</p></div>";
+      }
+      
+      String addLink = "'/" + id + "/add'";
+      Map<String, Object> variables = ImmutableMap.of("name", p.name(), "addLink", addLink,"intro", p.intro(), "picture", picturePath, "stories", storyHTML);
       return new ModelAndView(variables, "place.ftl");
     }
+  }
+  
+  private String dateToString(Story s) {
+    String date;
+    if (s.yearOnly()) {
+      date = Integer.toString(s.date().get(Calendar.YEAR));
+    } else {
+      String month;
+      switch (s.date().get(Calendar.MONTH)) {
+        case 0:
+          month = "January";
+          break;
+        case 1:
+          month = "February";
+          break;
+        case 2:
+          month = "March";
+          break;
+        case 3:
+          month = "April";
+          break;
+        case 4:
+          month = "May";
+          break;
+        case 5:
+          month = "June";
+          break;
+        case 6:
+          month = "July";
+          break;
+        case 7:
+          month = "August";
+          break;
+        case 8:
+          month = "September";
+          break;
+        case 9:
+          month = "October";
+          break;
+        case 10:
+          month = "November";
+          break;
+        default:
+          month = "December";
+      }
+      date = month + " " + Integer.toString(s.date().get(Calendar.YEAR));
+    }
+    return date;
   }
   
   private static class FrontHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       
+      
+      Map<String, Object> variables = ImmutableMap.of("title", "Living City");
+      return new ModelAndView(variables, "main.ftl");
+    }
+  }
+  
+  private static class AddStoryHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      String id = req.params(":placeID");
+      
+      System.out.println(id);
       
       Map<String, Object> variables = ImmutableMap.of("title", "Living City");
       return new ModelAndView(variables, "main.ftl");
@@ -112,7 +187,6 @@ public class Main {
       Double latSW = Double.parseDouble(qm.value("latSW"));
       Double lngSW = Double.parseDouble(qm.value("lngSW"));
 
-      System.out.println("(" + latNE + ", " + lngNE + ")     " + latSW + ", " + lngSW + ")");
       LatLng northEast = new LatLng(latNE, lngNE);
       LatLng southWest = new LatLng(latSW, lngSW);
 
@@ -143,8 +217,6 @@ public class Main {
         e.printStackTrace();
       }
 
-      System.out.println(places.size());
-      System.out.println();
       return GSON.toJson(places);
     }
   }
