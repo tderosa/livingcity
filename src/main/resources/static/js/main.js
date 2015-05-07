@@ -7,7 +7,7 @@ $(document).ready(function() {
 	
 	function initialize() {
 	  var mapOptions = {
-	    zoom: 15
+	    zoom: 16
 	  };
 	  map = new google.maps.Map(document.getElementById('map-container'), mapOptions);
 	
@@ -20,11 +20,12 @@ $(document).ready(function() {
 		  	map: map,
 		  	center: pos,
 		  	clickable: false,
-		  	radius: 20,
-		  	strokeColor: "#2EB9FF",
-		  	fillColor: "#2EB9FF",
-		  	fillOpacity: 0.5,
-		  	strokeWeight: 3,
+		  	radius: 10,
+		  	strokeColor: "#2e7bee",
+		  	strokeOpacity: 0.4,
+		  	fillColor: "#2e7bee",
+		  	fillOpacity: 1,
+		  	strokeWeight: 15,
 		  });
 	      map.setCenter(pos);
 	    }, function() {
@@ -75,8 +76,7 @@ $(document).ready(function() {
 			allPlaces.forEach(function(p) {
 				places.push(p);
 				var point = new google.maps.LatLng(p.location.lat, p.location.lng);
-				var link = "/" + p.id;
-				console.log(link);
+				var link = "/loc/" + p.id;
 				var marker = new google.maps.Marker({
 					position: point,
 					map: map,

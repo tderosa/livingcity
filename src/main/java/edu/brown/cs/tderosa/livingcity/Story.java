@@ -4,21 +4,26 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class Story {
-  private String id, authorName, authorAbt, text;
+  private String id, authorName, authorAbt, text, audioPath;
   private Place place;
   private Calendar date;
   private boolean yearOnly;
 
-  public Story(String id, String[] date, String authorName, String authorAbt, String text) {
+  public Story(String id, String[] date, String authorName, String authorAbt, String text, String audioPath) {
     this.id = id;
     this.authorName = authorName;
     this.authorAbt = authorAbt;
     this.text = text;
     this.date = stringToCal(date);
+    this.audioPath = audioPath;
   }
   
   public void setPlace(Place p) {
     place = p;
+  }
+  
+  public String audioPath() {
+    return audioPath;
   }
   
   public Calendar stringToCal(String[] date) {

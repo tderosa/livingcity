@@ -3,6 +3,7 @@
     <meta charset="utf-8">
     <title>${title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/html5bp.css">
     <link rel="stylesheet" href="css/stylesheet.css">
@@ -10,9 +11,8 @@
   </head>
   <body>
      <div class="container">
-     <p class="title">Living City</p>
+     <img class="title" src="assets/logo.png">
      <div class="nav">
-        <a href="/list" class="btn">List</a>
         <div id="search-bar">
           <input type="text" id="search">
           <img id="search-icon" src="assets/search.png" />

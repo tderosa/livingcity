@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * CSV parser class. Takes in a filename and parses.
@@ -37,8 +37,11 @@ public class CSV {
       reader = new BufferedReader(new FileReader(filename));
       String line = "";
       String[] data = null;
+      String delim = ",";
+      String regex;
       while ((line = reader.readLine()) != null) {
-        data = line.split(",");
+        regex = "(?<!\\\\)" + Pattern.quote(delim);
+        data = line.split(regex);
         parsedText.add(data);
       }
     } catch (FileNotFoundException e) {

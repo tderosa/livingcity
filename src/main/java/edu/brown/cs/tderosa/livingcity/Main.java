@@ -25,16 +25,19 @@ import freemarker.template.Configuration;
 
 public class Main {
   private DBManager db;
+  private String[] args;
   private final static Gson GSON = new Gson();
 
   public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
     new Main(args).run();
   }
 
-  private Main(String[] args) {}
+  private Main(String[] args) {
+    this.args = args;
+  }
 
   private void run() throws IOException, ClassNotFoundException, SQLException {
-    this.db = new DBManager("db2.sqlite3");
+    this.db = new DBManager("db2.sqlite3", args[0]);
     runSparkServer();
   }
 
@@ -68,16 +71,15 @@ public class Main {
     Spark.get("/", new FrontHandler(), freeMarker);
     Spark.post("/getPlaces", new GetPlaces());
     Spark.post("/getAllPlaces", new SendAllPlaces());
-    Spark.get("/:placeID", new PlaceHandler(), freeMarker);
-    Spark.get("/:placeID/add", new StoryFormView(), freeMarker);
-    Spark.post("/add", new AddStory(), freeMarker);
+    Spark.get("/loc/:placeID", new PlaceHandler(), freeMarker);
+    Spark.get("/loc/:placeID/add", new StoryFormView(), freeMarker);
+    Spark.post("/add", new AddStory());
   }
 
   private class PlaceHandler implements TemplateViewRoute {
     @Override
     public ModelAndView handle(Request req, Response res) {
       String id = req.params(":placeID");
-      
       Place p = null;
       try {
         p = db.getPlaceById(id);
@@ -85,22 +87,25 @@ public class Main {
         e.printStackTrace();
       }
       
-      System.out.println(p);
-      String picturePath = "'../assets/" + p.picture() + "'";
+      String picturePath = "'../../assets/" + p.picture() + "'";
       String storyHTML = "";
       List<Story> stories = null;
       try {
-        stories = db.getStories(id);
+        stories = db.getTextStoriesByPlace(id);
       } catch (SQLException e) {
         e.printStackTrace();
       }
       
       for (Story s: stories) {
         String dateString = dateToString(s);
-        storyHTML += "<div class='story'><p class='date'>" + dateString + "</p><p class='story-text'>- "+s.text()+"</p><p class='author'> - "+s.author()+"</p><p class='author-abt'>"+s.authorAbt()+"</p></div>";
+        if (s.audioPath() == null) {
+          storyHTML += "<div class='story'><p class='date'>" + dateString + "</p><p class='story-text'>- "+s.text()+"</p><p class='author'> - "+s.author()+"</p><p class='author-abt'>"+s.authorAbt()+"</p></div>";
+        } else {
+          storyHTML += "<div class='story'><p class='date'>" + dateString + "- </p><audio controls><source src='../../assets/audio/"+s.audioPath()+"' type='audio/mp3'>Your browser does not support the audio element</audio><p class='author'> - "+s.author()+"</p><p class='author-abt'>"+s.authorAbt()+"</p></div>";
+        }
       }
       
-      String addLink = "'/" + id + "/add'";
+      String addLink = "'/loc/" + id + "/add'";
       Map<String, Object> variables = ImmutableMap.of("name", p.name(), "addLink", addLink,"intro", p.intro(), "picture", picturePath, "stories", storyHTML);
       return new ModelAndView(variables, "place.ftl");
     }
@@ -125,15 +130,15 @@ public class Main {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      String link = "/" + id;
+      String link = "/loc/" + id;
       Map<String, Object> variables = ImmutableMap.of("title", "Living City", "name", p.name(), "id", id, "placeLink", link);
       return new ModelAndView(variables, "add.ftl");
     }
   }
 
-  private class AddStory implements TemplateViewRoute {
+  private class AddStory implements Route {
     @Override
-    public ModelAndView handle(final Request req, final Response res) {
+    public Object handle(final Request req, final Response res) {
       QueryParamsMap qm = req.queryMap();
       String id = qm.value("id");
       Place p = null;
@@ -156,30 +161,13 @@ public class Main {
       
       Story s = null;
       try {
-        s = db.insertStory(p, date, author, authorAbt, text);
+        s = db.insertTextStory(p, date, author, authorAbt, text);
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      
-      String addLink = "'/" + id + "/add'";
-      String picturePath = "'../assets/" + p.picture() + "'";
-      String storyHTML = "";
-      
-      List<Story> stories = null;
-      try {
-        stories = db.getStories(id);
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      
-      for (Story story: stories) {
-        String dateString = dateToString(story);
-        storyHTML += "<div class='story'><p class='date'>" + dateString + "</p><p class='story-text'>- "+story.text()+"</p><p class='author'> - "+story.author()+"</p><p class='author-abt'>"+story.authorAbt()+"</p></div>";
-      }
-      
-      res.redirect("/" + id);
-      Map<String, Object> variables = ImmutableMap.of("name", p.name(), "addLink", addLink,"intro", p.intro(), "picture", picturePath, "stories", storyHTML);
-      return new ModelAndView(variables, "place.ftl");
+
+      res.redirect("/loc/" + id);
+      return s;
     }
   }
   

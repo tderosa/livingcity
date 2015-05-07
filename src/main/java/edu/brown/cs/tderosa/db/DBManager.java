@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Map;
 import edu.brown.cs.tderosa.livingcity.LatLng;
 import edu.brown.cs.tderosa.livingcity.Place;
 import edu.brown.cs.tderosa.livingcity.Story;
+import edu.brown.cs.tderosa.utils.CSV;
 import edu.brown.cs.tderosa.utils.RandomString;
 
 public class DBManager {
@@ -31,11 +33,12 @@ public class DBManager {
    * @throws ClassNotFoundException throws a class not found exception
    * @throws SQLException throws a sql exception
    */
-  public DBManager(String db) throws ClassNotFoundException, SQLException {
+  public DBManager(String db, String placeCSV) throws ClassNotFoundException, SQLException {
     this.db = db;
     setUpDB();
+//    updatePlaces(placeCSV);
     placeCache = getPlaces();
-    storyCache = getStories();
+    storyCache = getAllTextStories();
     randomString = new RandomString(5);
   }
 
@@ -63,6 +66,32 @@ public class DBManager {
     conn.close();
   }
   
+  public void updatePlaces(String placeFile) throws SQLException {
+    Statement stat = conn.createStatement();
+    stat.executeUpdate("PRAGMA foreign_keys = ON;");
+    stat.execute("DROP TABLE IF EXISTS picture");
+    stat.close();
+    
+    CSV reader = new CSV(placeFile);
+    List<String[]> rows = reader.parse();
+    
+    String query = "INSERT OR IGNORE INTO 'place' VALUES(?,?,?,?,?,?);";
+    PreparedStatement prep = conn.prepareStatement(query);
+    
+    for (String[] row: rows) {
+     prep.setString(1, row[0]);
+     prep.setString(2, row[1]);
+     prep.setString(3, row[2]);
+     prep.setString(4, row[3]);
+     prep.setDouble(5, Double.parseDouble(row[4]));
+     prep.setDouble(6, Double.parseDouble(row[5]));
+     prep.addBatch();
+    }
+    
+    prep.executeBatch();
+    prep.close();
+  }
+  
   public Collection<Place> places() {
     Collection<Place> p = placeCache.values();
     return p;
@@ -70,15 +99,12 @@ public class DBManager {
 
   public Place getPlaceById(String id) throws SQLException {
     Place place = placeCache.get(id);
-    System.out.println("what is place " + place);
     if (place == null) {
-      System.out.println(id);
       String query = "SELECT * FROM place WHERE id = ?;";
       PreparedStatement prep = conn.prepareStatement(query);
       prep.setString(1, id);
       
       String name, intro, pic_path;
-      Double lat, lng;
       ResultSet rs = prep.executeQuery();
       List<Place> places = new ArrayList<Place>();
       if (rs == null) {
@@ -94,7 +120,6 @@ public class DBManager {
         places.add(place);
         placeCache.put(id, place);
       }
-      System.out.println("palce " + place);
       rs.close();
       prep.close();
     }
@@ -125,14 +150,11 @@ public class DBManager {
 
     rs.close();
     prep.close();
-    
-    for (String IDD: places.keySet()) {
-      System.out.println(IDD + " / " + places.get(IDD));
-    }
+
     return places;
   }
   
-  public Story insertStory(Place p, String date, String author, String authorAbt, String text) throws SQLException {
+  public Story insertTextStory(Place p, String date, String author, String authorAbt, String text) throws SQLException {
     String storyID = randomString.nextString();
     while (storyCache.containsKey(storyID)) {
       storyID = randomString.nextString();
@@ -154,13 +176,13 @@ public class DBManager {
     prep.close();
     String[] dateArray = date.split("-");
     
-    Story story = new Story(storyID, dateArray, author, authorAbt, text);
+    Story story = new Story(storyID, dateArray, author, authorAbt, text, null);
     story.setPlace(getPlaceById(p.id()));
     
     return story;
   }
   
-  public Map<String, Story> getStories() throws SQLException {
+  public Map<String, Story> getAllTextStories() throws SQLException {
     String query = "SELECT * FROM story;";
     PreparedStatement prep = conn.prepareStatement(query);
 
@@ -177,7 +199,7 @@ public class DBManager {
       authorAbt = rs.getString(4);
       text = rs.getString(5);
       placeID = rs.getString(6);
-      Story story = new Story(id, date, author, authorAbt, text);
+      Story story = new Story(id, date, author, authorAbt, text, null);
       story.setPlace(getPlaceById(placeID));
       s.put(id, story);
     }
@@ -196,7 +218,6 @@ public class DBManager {
     prep.setDouble(4, southWest.lng());
 
     String id, name, intro, pic_path;
-    Double lat, lng;
     ResultSet rs = prep.executeQuery();
     List<Place> places = new ArrayList<Place>();
     if (rs == null) {
@@ -218,7 +239,7 @@ public class DBManager {
     return places;
   }
   
-  public List<Story> getStories(String placeID) throws SQLException {
+  public List<Story> getTextStoriesByPlace(String placeID) throws SQLException {
     Place p = getPlaceById(placeID);
     String query = "SELECT * FROM story WHERE place = ?;";
     PreparedStatement prep = conn.prepareStatement(query);
@@ -227,10 +248,7 @@ public class DBManager {
     String id, authorName, authorAbt, text, date;
     ResultSet rs = prep.executeQuery();
     List<Story> stories = new ArrayList<Story>();
-    if (rs == null) {
-      return null;
-    }
-
+    
     while (rs.next()) {
       id = rs.getString(1);
       date = rs.getString(2);
@@ -238,14 +256,32 @@ public class DBManager {
       authorName = rs.getString(3);
       authorAbt = rs.getString(4);
       text = rs.getString(5);
-      Story s = new Story(id, dateArray, authorName, authorAbt, text);
+      Story s = new Story(id, dateArray, authorName, authorAbt, text, null);
       storyCache.put(id, s);
       stories.add(s);
     }
-
+  
+    
+    query = "SELECT * FROM audio_stories WHERE place = ?;";
+    prep = conn.prepareStatement(query);
+    prep.setString(1, placeID);
+    rs = prep.executeQuery();
+    String path;
+    
+    while (rs.next()) {
+      id = rs.getString(1);
+      date = rs.getString(2);
+      String[] dateArray = date.split("-");
+      authorName = rs.getString(3);
+      authorAbt = rs.getString(4);
+      path = rs.getString(5);
+      Story s = new Story(id, dateArray, authorName, authorAbt, null, path);
+      storyCache.put(id, s);
+      stories.add(s);
+    }
+    
     rs.close();
     prep.close();
-   
     p.setStories(stories);    
     return stories;
   }
